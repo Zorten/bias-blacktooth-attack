@@ -1,0 +1,17 @@
+{
+    "if": "Microsoft Modern Wireless Headset IF.json",
+    "lmin": "07",
+    "lmax": "07",
+    "btadd": "a0:4a:5e:f7:40:ec",
+    "btname": "Microsoft Modern Wireless Headset",
+    "lmpver": "10",
+    "companyid": "93",
+    "subversion": "34659",
+    "lmpfp0": "fffffffadbfd7b87",
+    "lmpfp1": "0300000000000000",
+    "lmpfp2": "1f00000000000000",
+    "iocaps": "03",
+    "authreq": "02",
+    "oobdata": "0",
+    "deviceclass": "0a410c"
+}

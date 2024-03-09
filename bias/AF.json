@@ -1,7 +1,7 @@
 {
-    "af": "CYW920819",
+    "af": "CYW920735",
     "arch": "ARM32-le-thumbonly",
-    "hci": "1",
+    "hci": "0",
     "addrlmin": "0x20118a",
     "addrlmax": "0x20118b",
     "addrbtname": "0x200f48",

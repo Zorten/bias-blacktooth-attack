@@ -8,7 +8,7 @@ import json
 
 B_PATH = 'bias.py'
 BT_PATH = 'bias-template.py'
-IF_PATH = 'IF_PIXEL2.json'
+IF_PATH = 'IF_MSHEADSET.json'
 AF_PATH = 'AF.json'
 
 with open(BT_PATH, mode="r", encoding='utf-8') as BT_FP:
