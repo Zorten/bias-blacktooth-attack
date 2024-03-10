@@ -7,4 +7,4 @@ generate:
 	$(PY) generate.py
 
 bias:
-	sudo $(PY2) bias.py
+	sudo $(PY) bias.py
