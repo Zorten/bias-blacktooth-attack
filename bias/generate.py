@@ -28,20 +28,20 @@ with open(B_PATH, mode="w", encoding='utf-8') as B_FP:
     for line in bt:
         # NOTE: IF
         if line.startswith('lmin'):
-            line = 'lmin = "\\x{}"\n'.format(IF['lmin'])
+            line = 'lmin = b"\\x{}"\n'.format(IF['lmin'])
             print(line)
         elif line.startswith('lmax'):
-            line = 'lmax = "\\x{}"\n'.format(IF['lmax'])
+            line = 'lmax = b"\\x{}"\n'.format(IF['lmax'])
             print(line)
         elif line.startswith('btadd_le'):
             btadd_le = '"'
             for i in [15, 12, 9, 6, 3, 0]:
-                btadd_le += '\\x{}'.format(IF['btadd'][i:i+2])
+                btadd_le += 'b\\x{}'.format(IF['btadd'][i:i+2])
             btadd_le += '"\n'
             line = 'btadd_le = {}'.format(btadd_le)
             print(line)
         elif line.startswith('btname'):
-            line = 'btname = "{}\\x00"\n'.format(IF['btname'])
+            line = 'btname = "{}\\x00".encode()\n'.format(IF['btname'])
             print(line)
         elif line.startswith('lmpver'):
             line = 'lmpver = {}\n'.format(IF['lmpver'])
@@ -95,8 +95,7 @@ with open(B_PATH, mode="w", encoding='utf-8') as B_FP:
             print(line)
         # NOTE: AF
         elif line.startswith('internalblue.interface'):
-            line  = 'internalblue.interface = internalblue.device_list()'
-            line += '[0][{}]\n'.format(AF['hci'])
+            line  = 'internalblue.interface = "hci{}"\n'.format(AF['hci'])
             print(line)
         elif line.startswith('addrlmin'):
             line = 'addrlmin = {}\n'.format(AF['addrlmin'])
