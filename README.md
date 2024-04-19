@@ -100,7 +100,7 @@ In this project we attempt to replicate the Blacktooth [1](https://github.com/Zo
 - **Connection Attempt**
   - Once the attack script has been executed, run the following within the internalblue interface to send a connection request to the victim device. It might take a couple of attempts for the connection to happen.
   - Once successful, it terminates almost immediately, which we suspect happens because the encryption key is not negotiated correctly, so no data transfer is possible.
-  - Silent connection without authorization is observable from the victim device as the BT device name of the impersonated device gets overwritten by the name of the board, ‘localhost.localdomain’:
+  - Silent connection without authorization is observable from the victim device as its BT device name gets overwritten by the name of the board, ‘localhost.localdomain’:
     - `connect <Bluetooth_Device_Address>`
 
 
