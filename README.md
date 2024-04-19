@@ -5,7 +5,7 @@ Repository forked from: [BIAS](https://github.com/francozappa/bias)
 ## Collaborators
 [Zergio Ruvalcaba](https://github.com/Zorten) 
 
-[Shruti Jawale]()
+[Shruti Jawale](https://github.com/shjawale)
 
 [Mariam Golwalla](https://github.com/mgolwalla)
 
