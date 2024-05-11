@@ -17,7 +17,7 @@ Repository forked from: [BIAS](https://github.com/francozappa/bias)
 
 ## Introduction
 
-In this project we attempt to replicate the Blacktooth [1](https://github.com/Zorten/bias-blacktooth-attack/edit/master/README.md#resources) attack. We use a CYW920735Q60EVB-01 Evaluation Board connected to a laptop running a Fedora VM with a modified Linux 4.14.111. We attack a pair of Microsoft Modern Wireless Headset, the information of which can be found in the [Impersonation File](https://github.com/Zorten/bias-blacktooth-attack/blob/master/bias/IF_MSHEADSET.json) in this repository. We make use of the BIAS [2](https://github.com/Zorten/bias-blacktooth-attack/edit/master/README.md#resources) as well as the InternalBlue[3](https://github.com/Zorten/bias-blacktooth-attack/edit/master/README.md#resources) toolsets. The attack was successful in impersonating the victim device and establishing a connection, however the connection is not maintained and we were not able to elevate the Bluetooth profile.  
+In this project we attempt to replicate the Blacktooth [1](https://github.com/Zorten/bias-blacktooth-attack/edit/master/README.md#resources) attack. We use a CYW920735Q60EVB-01 Evaluation Board connected to a laptop running a Fedora VM with a modified Linux 4.14.111. We attack a pair of Microsoft Modern Wireless Headset, the information of which can be found in the [Impersonation File](https://github.com/Zorten/bias-blacktooth-attack/blob/master/bias/IF_MSHEADSET.json) in this repository. We make use of the BIAS [2](https://github.com/Zorten/bias-blacktooth-attack/edit/master/README.md#resources) as well as the InternalBlue [3](https://github.com/Zorten/bias-blacktooth-attack/edit/master/README.md#resources) toolsets. The attack was successful in impersonating the victim device and establishing a connection, however the connection is not maintained and we were not able to elevate the Bluetooth profile.  
 
 ## Files Accessed/Changed
 
@@ -133,8 +133,8 @@ Then we all worked together when it came to sniffing the headphones’ informati
 
 
 
-======================================================================================
-## Original README
+==========================================================================
+## Original BIAS README
 
 Repository about [Bluetooth Impersonation AttackS (BIAS)](https://francozappa.github.io/about-bias/).
 
